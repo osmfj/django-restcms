@@ -1,0 +1,26 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+{% load l10n %}
+
+{% block head_title %}{% trans "Create Page" %}{% endblock %}
+
+{% block body %}
+    <form method="POST" action="">
+        {% csrf_token %}
+        {{ form.as_p }}
+{% if form.instance.pk %}
+        <dl>
+            <dt>form.instance.language</dt>
+            <dd>{% trans form.instance.get_language_display %}</dd>
+            <dt>form.instance.status</dt>
+            <dd>{% trans form.instance.get_status_display %}</dd>
+            <dt>form.instance.created</dt>
+            <dd>{{ form.instance.created|localize }}</dd>
+        </dl>
+ {% endif %}
+        <div class="form-actions">
+            <input class="btn btn-primary" type="submit" value="{% trans "Save" %}" />
+        </div>
+    </form>
+{% endblock %}

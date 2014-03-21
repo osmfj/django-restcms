@@ -1,0 +1,16 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+
+{% block page_title %}{{ page.title }}{% endblock %}
+
+{% block body %}
+    {{ page.html_title|safe }}
+    {% if editable %}
+        <div class="pull-right">
+            <a href="{% url 'cms_page_edit' page.path %}" class="btn btn-primary">
+                <i class="icon-pencil icon-large"></i> {% trans "Edit page" %}</a>
+        </div>
+    {% endif %}
+    {{ page.body|safe }}
+{% endblock %}
