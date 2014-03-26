@@ -18,23 +18,43 @@ class Page(models.Model):
     """
     >>> from django.conf import settings
     >>> lang = settings.LANGUAGES[0][0]
-    >>> _ = Page.objects.create(path="path1", content="content", language=lang)
+    >>> _ = Page.objects.create(path="path1/", content="content", language=lang)
 
     Page is unique under path and language.
-    >>> Page.objects.create(path="path1", content="content", language=lang)
+    >>> Page.objects.create(path="path1/", content="content", language=lang)
     Traceback (most recent call last):
         ...
-    IntegrityError: UNIQUE constraint failed: restcms_page.path, restcms_page.language
+    ValidationError: {'__all__': [u'Page with this Path and Language already exists.']}
 
     So when one of them is different, its acceptable.
-    >>> _ = Page.objects.create(path="path1", content="content", language=lang + "_2")
-    >>> _ = Page.objects.create(path="path2", content="content", language=lang)
+    >>> lang2 = settings.LANGUAGES[1][0]
+    >>> _ = Page.objects.create(path="path2/", content="content", language=lang)
+    >>> _ = Page.objects.create(path="path2/", content="content", language=lang2)
 
     The path value must not be started with "/" and be ends with "/".
-    >>> Page(path="/path", content="content", language=lang).full_clean()
+    >>> Page.objects.create(path="/path", content="content", language=lang)
     Traceback (most recent call last):
         ...
     ValidationError: {'path': ...}
+
+    The content must actually be a reStructuredText.
+    >>> page = Page.objects.create(path="path3/", content="Hello\\n=====\\n\\nHow are you?\\n\\nTopics\\n------", language=lang)
+    >>> print page.title
+    Hello
+    >>> print page.body # doctest: +NORMALIZE_WHITESPACE
+    <p>How are you?</p>
+    <div class="section" id="topics">
+    <h1>Topics</h1>
+    </div>
+
+    The content may have subtitle because of reStructuredText.
+    >>> page = Page.objects.create(path="path4/", content="Hello\\n=====\\n\\nSub title\\n---------\\n\\nHow are you?", language=lang)
+    >>> print page.title
+    Hello
+    >>> print page.subtitle
+    Sub title
+    >>> print page.body # doctest: +NORMALIZE_WHITESPACE
+    <p>How are you?</p>
     """
 
     DRAFT = 1
@@ -76,6 +96,12 @@ class Page(models.Model):
         return self._out.get('title')
 
     @property
+    def subtitle(self):
+        if self._out is None:
+            self._render_content()
+        return self._out.get('subtitle')
+
+    @property
     def body(self):
         if self._out is None:
             self._render_content()
@@ -86,6 +112,12 @@ class Page(models.Model):
         if self._out is None:
             self._render_content()
         return self._out.get('html_title')
+
+    @property
+    def html_subtitle(self):
+        if self._out is None:
+            self._render_content()
+        return self._out.get('html_subtitle')
 
     @property
     def html_body(self):
@@ -150,6 +182,10 @@ class Page(models.Model):
             if language in languages:
                 return language
         return None
+
+    def save(self, **kwargs):
+        self.full_clean()
+        return super(Page, self).save(**kwargs)
 
 
 reversion.register(Page)
