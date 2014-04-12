@@ -1,12 +1,6 @@
-import sys
-
-PY3 = sys.version > '3'
-if PY3:
-    from io import StringIO
-else:
-    from StringIO import StringIO
-
 import tempfile
+
+from six import StringIO
 
 from django.core.urlresolvers import reverse
 from django.conf import settings
@@ -17,6 +11,14 @@ from .models import Page, File
 
 
 class PageEditorRoleMixin(object):
+    def loginAsAnUser(self):
+        from django.contrib.auth.models import User, Permission
+
+        username = "user1"
+        password = "passwd"
+        User.objects.create_user(username, "foo@bar.com", password)
+        assert self.client.login(username=username, password=password)
+
     def loginAsPageEditor(self):
         from django.contrib.auth.models import User, Permission
 
@@ -221,6 +223,47 @@ class PageEditTest(TestCase, PageMixin, PageEditorRoleMixin):
         self.assertContains(response, "content1")
         self.assertTemplateUsed(response, "cms/page_detail.html")
 
+    def test_community_editable(self):
+        path = "community/foo/"
+        language = settings.LANGUAGES[0][0]
+        view_url = reverse("cms_page", kwargs={"path": path})
+        edit_url = reverse("cms_page_edit", kwargs={"path": path})
+
+        self.loginAsAnUser()
+
+        page = self.create_page(content="content1", path=path, status=Page.DRAFT)
+
+        # visit for creation.
+        response = self.client.get(edit_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "cms/page_edit.html")
+
+        response = self.client.post(edit_url, data={
+            "content": "content2",
+            "path": path,
+            "language": language,
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(view_url, response['Location'])
+
+        # once the page is published, can be showed to others.
+        page = Page.objects.get(pk=page.pk)
+        page.publish()
+        page.save()
+        response = self.client.get(view_url)
+        self.assertContains(response, "content2")
+        self.assertTemplateUsed(response, "cms/page_detail.html")
+
+    def test_edit_disallowed(self):
+        path = "foo/"
+        edit_url = reverse("cms_page_edit", kwargs={"path": path})
+
+        self.loginAsAnUser()
+
+        # visit for creation but failed.
+        response = self.client.get(edit_url)
+        self.assertEqual(response.status_code, 404)
+
 
 class FileMixin(object):
     def create_file(self, file, name=None):
@@ -243,7 +286,7 @@ class FileDownloadTest(TestCase, FileMixin):
     def test_it(self):
         f = self.create_file(StringIO("Hello"), "hello.txt")
 
-        url = reverse("file_download", args=(f.pk, f.file.name))
+        url = f.download_url()
         response = self.client.get(url)
         self.assertContains(response, "Hello")
 
@@ -251,7 +294,7 @@ class FileDownloadTest(TestCase, FileMixin):
     def test_x_accel_redirect(self):
         f = self.create_file(StringIO("Hello"), "hello.txt")
 
-        url = reverse("file_download", args=(f.pk, f.file.name))
+        url = f.download_url()
         with self.settings(USE_X_ACCEL_REDIRECT=True):
             response = self.client.get(url)
         self.assertEqual(response["X-Accel-Redirect"], f.file.url)

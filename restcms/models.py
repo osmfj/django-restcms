@@ -87,9 +87,6 @@ class Page(models.Model):
     class Meta:
         unique_together = (("path", "language"),)
 
-    def __unicode__(self):
-        return '%s(%s)' % (self.title, self.language)
-
     def __init__(self, *args, **kwargs):
         super(Page, self).__init__(*args, **kwargs)
         self._out = None
@@ -186,7 +183,6 @@ class Page(models.Model):
             language = language[0:pos]
             if language in languages:
                 return language
-        return None
 
     def save(self, **kwargs):
         self.full_clean()

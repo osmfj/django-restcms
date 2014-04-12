@@ -26,13 +26,9 @@ def get_page(path, language, published=True):
     except Page.DoesNotExist:
         # fallback just with path
         key = {"path": path}
-        try:
-            q = objects.filter(**key)
-            if q.count() > 0:
-                return q.all()[0]
-        except Page.DoesNotExist:
-            pass
-        return None
+        q = objects.filter(**key)
+        if q.count() > 0:
+            return q.all()[0]
 
 
 def page_view(request, path):
