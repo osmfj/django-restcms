@@ -1,3 +1,11 @@
+import sys
+
+PY3 = sys.version > '3'
+if PY3:
+    from io import StringIO
+else:
+    from StringIO import StringIO
+
 import tempfile
 
 from django.core.urlresolvers import reverse
@@ -233,8 +241,6 @@ class FileDownloadTest(TestCase, FileMixin):
 
     @override_settings(MEDIA_ROOT=temp_MEDIA_ROOT)
     def test_it(self):
-        from StringIO import StringIO
-
         f = self.create_file(StringIO("Hello"), "hello.txt")
 
         url = reverse("file_download", args=(f.pk, f.file.name))
@@ -243,8 +249,6 @@ class FileDownloadTest(TestCase, FileMixin):
 
     @override_settings(MEDIA_ROOT=temp_MEDIA_ROOT)
     def test_x_accel_redirect(self):
-        from StringIO import StringIO
-
         f = self.create_file(StringIO("Hello"), "hello.txt")
 
         url = reverse("file_download", args=(f.pk, f.file.name))

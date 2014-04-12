@@ -20,11 +20,14 @@ class Page(models.Model):
     >>> lang = settings.LANGUAGES[0][0]
     >>> _ = Page.objects.create(path="path1/", content="content", language=lang)
 
-    Page is unique under path and language.
-    >>> Page.objects.create(path="path1/", content="content", language=lang)
-    Traceback (most recent call last):
-        ...
-    ValidationError: {'__all__': [u'Page with this Path and Language already exists.']}
+    Page must be unique under path and language.
+    >>> from django.core.exceptions import ValidationError
+    >>> try:
+    ...     Page.objects.create(path="path1/", content="content", language=lang)
+    ...     raise AssertionError("Doesn't validate")
+    ... except ValidationError as e:
+    ...     print(e.message_dict['__all__'][0])
+    Page with this Path and Language already exists.
 
     So when one of them is different, its acceptable.
     >>> lang2 = settings.LANGUAGES[1][0]
@@ -32,16 +35,18 @@ class Page(models.Model):
     >>> _ = Page.objects.create(path="path2/", content="content", language=lang2)
 
     The path value must not be started with "/" and be ends with "/".
-    >>> Page.objects.create(path="/path", content="content", language=lang)
-    Traceback (most recent call last):
-        ...
-    ValidationError: {'path': ...}
+    >>> try:
+    ...     Page.objects.create(path="/path", content="content", language=lang)
+    ...     raise AssertionError("Doesn't validate")
+    ... except ValidationError as e:
+    ...     print(e.message_dict['path'][0] + '')
+    Path can only contain letters, numbers and hyphens and end with /
 
     The content must actually be a reStructuredText.
     >>> page = Page.objects.create(path="path3/", content="Hello\\n=====\\n\\nHow are you?\\n\\nTopics\\n------", language=lang)
-    >>> print page.title
+    >>> print(page.title)
     Hello
-    >>> print page.body # doctest: +NORMALIZE_WHITESPACE
+    >>> print(page.body) # doctest: +NORMALIZE_WHITESPACE
     <p>How are you?</p>
     <div class="section" id="topics">
     <h1>Topics</h1>
@@ -49,11 +54,11 @@ class Page(models.Model):
 
     The content may have subtitle because of reStructuredText.
     >>> page = Page.objects.create(path="path4/", content="Hello\\n=====\\n\\nSub title\\n---------\\n\\nHow are you?", language=lang)
-    >>> print page.title
+    >>> print(page.title)
     Hello
-    >>> print page.subtitle
+    >>> print(page.subtitle)
     Sub title
-    >>> print page.body # doctest: +NORMALIZE_WHITESPACE
+    >>> print(page.body) # doctest: +NORMALIZE_WHITESPACE
     <p>How are you?</p>
     """
 
