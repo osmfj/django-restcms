@@ -66,9 +66,9 @@ class Page(models.Model):
     PUBLIC = 2
     REJECT = 3
     STATUS_CHOICES = (
-        (DRAFT, _(u"Draft")),
-        (PUBLIC, _(u"Public")),
-        (REJECT, _(u"Reject")),
+        (DRAFT, _("Draft")),
+        (PUBLIC, _("Public")),
+        (REJECT, _("Reject")),
     )
 
     PATH_RE = getattr(settings, 'RESTCMS_PAGE_PATH_REGEX', r"(([\w-]{1,})(/[\w-]{1,})*)/")
@@ -171,7 +171,7 @@ class Page(models.Model):
 
     def validate_path(self):
         if not re.match(Page.PATH_RE, self.path):
-            raise ValidationError({"path": [_(u"Path can only contain letters, numbers and hyphens and end with /")]})
+            raise ValidationError({"path": [_("Path can only contain letters, numbers and hyphens and end with /")]})
 
     @classmethod
     def guess_language(cls, language):

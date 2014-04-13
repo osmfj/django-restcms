@@ -15,7 +15,7 @@ setup(
     version='0.1',
     packages=['restcms'],
     include_package_data=True,
-    license='BSD License',  # example license
+    license='BSD License',
     description='A simple Django cms with reStructuredText.',
     long_description=README,
     url='http://www.example.com/',
@@ -32,11 +32,13 @@ setup(
         'Environment :: Web Environment',
         'Framework :: Django',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License', # example license
+        'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
+        # by this issue, we cannot test anyway.
+        # https://github.com/pypa/pip/issues/1513
+        # 'Programming Language :: Python :: 3.1',
         'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
         'Topic :: Internet :: WWW/HTTP',
