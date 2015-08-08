@@ -34,12 +34,12 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2.6',
+        #'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         # by this issue, we cannot test anyway.
         # https://github.com/pypa/pip/issues/1513
         # 'Programming Language :: Python :: 3.1',
-        'Programming Language :: Python :: 3.2',
+        #'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',

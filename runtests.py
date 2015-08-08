@@ -1,5 +1,8 @@
 import sys
 from django.conf import settings
+import django
+if django.get_version() >= '1.7':
+    django.setup()
 
 settings.configure(DEBUG=True,
                    DATABASES={
