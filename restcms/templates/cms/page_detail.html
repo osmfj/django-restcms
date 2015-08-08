@@ -11,9 +11,12 @@
                 <i class="icon-pencil icon-large"></i> {% trans "Edit page" %}</a>
         </div>
     {% endif %}
-        {{ page.html_title|safe }}
-        {{ page.html_subtitle|safe }}
-        {{ page.body|safe }}
+
+    {{ page.html_title|safe }}
+    {{ page.html_subtitle|safe }}
+    {{ page.body|safe }}
+
+    {% if debug %}
         <dl>
             <dt>page.html_title</dt>
             <dd>{{ page.html_title }}</dd>
@@ -24,4 +27,5 @@
             <dt>page.html_body</dt>
             <dd>{{ page.html_body }}</dd>
         </dl>
+    {% endif %}
 {% endblock %}
